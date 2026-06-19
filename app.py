@@ -1,23 +1,13 @@
-import streamlit as st
-from transformers import AutoModelForSeq2SeqLM, AutoTokenizer, GenerationConfig
-from peft import PeftModel
-from sentence_transformers import SentenceTransformer, util
-from datasets import load_dataset, concatenate_datasets
-import torch
-
-st.set_page_config(page_title="Data Science Interview Assistant", layout="wide")
-st.title("Data Science Interview Assistant")
-st.write("Ask any data science interview question and get an AI-powered answer.")
-
 @st.cache_resource
 def load_models():
     # Load retriever
     retriever = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
     
-    # Load PEFT model from HuggingFace
+    # Load PEFT model — CPU only, float32 for Streamlit Cloud
     base = AutoModelForSeq2SeqLM.from_pretrained(
         "google/flan-t5-base",
-        torch_dtype=torch.float32
+        torch_dtype=torch.float32,
+        low_cpu_mem_usage=True
     )
     model = PeftModel.from_pretrained(
         base,
