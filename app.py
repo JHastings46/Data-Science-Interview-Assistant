@@ -1,22 +1,28 @@
 @st.cache_resource
 def load_models():
-    # Load retriever
-    retriever = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
+    retriever = SentenceTransformer(
+        "sentence-transformers/all-MiniLM-L6-v2"
+    )
     
-    # Load PEFT model — CPU only, float32 for Streamlit Cloud
     base = AutoModelForSeq2SeqLM.from_pretrained(
         "google/flan-t5-base",
         torch_dtype=torch.float32,
-        low_cpu_mem_usage=True
+        low_cpu_mem_usage=True,
+        device_map="cpu"
     )
+    
     model = PeftModel.from_pretrained(
         base,
-        "joelhastings-ds/ds-interview-assistant"
+        "joelhastings-ds/ds-interview-assistant",
+        device_map="cpu"
     )
+    
     model.eval()
+    
     tokenizer = AutoTokenizer.from_pretrained(
         "joelhastings-ds/ds-interview-assistant"
     )
+    
     return retriever, model, tokenizer
 
 @st.cache_data
